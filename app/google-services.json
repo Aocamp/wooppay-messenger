@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "266886106479",
+    "firebase_url": "https://wooppaymessenger.firebaseio.com",
+    "project_id": "wooppaymessenger",
+    "storage_bucket": "wooppaymessenger.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:266886106479:android:525051302fce4215",
+        "android_client_info": {
+          "package_name": "com.andrey.wooppaymessenger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "266886106479-918nuu4bj6p7ig5q5cv1166q4ak5h163.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.andrey.wooppaymessenger",
+            "certificate_hash": "80024ff887fd710c2a0b8ad88c1ab89eca22444a"
+          }
+        },
+        {
+          "client_id": "266886106479-tk49pmne7dtq9d3r4bda0b76q1o4835o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClpcYCKhTcaQ26Y7FbZRNpEsLuts5ZJCk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "266886106479-tk49pmne7dtq9d3r4bda0b76q1o4835o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

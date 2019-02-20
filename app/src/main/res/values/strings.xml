@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">WooppayMessenger</string>
+    <string name="btn_sms_code">Получить код</string>
+    <string name="et_login">Номер телефона</string>
+    <string name="et_email">Email</string>
+    <string name="et_sms_code">СМС код</string>
+    <string name="et_password">Пароль</string>
+    <string name="et_check_password">Подтверждение пароля</string>
+    <string name="tv_phone_email">Введите свой номер телефона и адрес электронной почты</string>
+    <string name="btn_create_account">Создать аккаунт</string>
+    <string name="btn_sign_in">Войти</string>
+    <string name="btn_next">Далее</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:mask="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.AuthActivity">
+
+    <br.com.sapereaude.maskedEditText.MaskedEditText
+        android:id="@+id/et_auth_login"
+        android:layout_width="199dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/et_auth_password"
+        android:layout_marginTop="157dp"
+        android:hint="1234567890"
+        android:inputType="phone"
+        android:typeface="monospace"
+        app:keep_hint="true"
+        mask:allowed_chars="1234567890"
+        mask:mask="7(###)###-##-##"
+        android:layout_alignLeft="@+id/et_auth_password" />
+
+    <EditText
+        android:id="@+id/et_auth_password"
+        android:layout_width="202dp"
+        android:layout_height="58dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="14dp"
+        android:ems="10"
+        android:hint="@string/et_password"
+        android:inputType="textPassword"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="254dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="14dp" />
+
+    <Button
+        android:id="@+id/btn_sign_in"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:text="@string/btn_sign_in"
+        android:layout_alignParentLeft="true" />
+</RelativeLayout>
