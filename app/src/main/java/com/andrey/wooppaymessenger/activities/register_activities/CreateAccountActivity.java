@@ -68,13 +68,13 @@ public class CreateAccountActivity extends AppCompatActivity{
                 callCreateAccount.enqueue(new retrofit2.Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        if (response.code() == 201){
+
                             Intent intent = new Intent(CreateAccountActivity.this, ActivateAccountActivity.class);
                             intent.putExtra(ActivateAccountActivity.EXTRA_USER_LOGIN, login);
                             intent.putExtra(ActivateAccountActivity.EXTRA_USER_EMAIL, email);
                             startActivity(intent);
-                        }
-                        else if (response.code() == 202){
+
+                        if (response.code() == 202){
                             Toast.makeText(CreateAccountActivity.this, "СМС-код был отправлен ранее. Повторите попытку через некоторое время.", Toast.LENGTH_LONG)
                                     .show();
                         }

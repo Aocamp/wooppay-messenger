@@ -7,9 +7,9 @@ public class ChatMessage {
     private String messageUser;
     private long messageTime;
 
-    public ChatMessage(String messageText) {
+    public ChatMessage(String messageUser, String messageText) {
         this.messageText = messageText;
-        //this.messageUser = messageUser;
+        this.messageUser = messageUser;
 
         messageTime = new Date().getTime();
     }

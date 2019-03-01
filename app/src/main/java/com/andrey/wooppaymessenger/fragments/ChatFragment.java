@@ -7,38 +7,37 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.andrey.wooppaymessenger.ChatApplication;
 import com.andrey.wooppaymessenger.R;
 import com.andrey.wooppaymessenger.adapters.MessageAdapter;
 import com.andrey.wooppaymessenger.models.ChatMessage;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.Socket;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-
 
 public class ChatFragment extends Fragment {
     private static final String TAG = "MainActivity";
 
     private List<ChatMessage> mMessages = new ArrayList<>();
-
     private RecyclerView mRecyclerView;
     private MessageAdapter mAdapter;
+
+    private String mUsername = "User";
+
+    Socket mSocket;
 
     FloatingActionButton floatingActionButton;
     EditText mInput;
@@ -61,6 +60,13 @@ public class ChatFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ChatApplication app = (ChatApplication) getActivity().getApplication();
+        mSocket = app.getSocket();
+        mSocket.on(Socket.EVENT_CONNECT, onConnect);
+        mSocket.on("user disconnect", onDisconnect);
+        mSocket.on("message", onNewMessage);
+        mSocket.connect();
     }
 
     @Override
@@ -68,7 +74,6 @@ public class ChatFragment extends Fragment {
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_chat, container, false);
     }
-
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -80,83 +85,90 @@ public class ChatFragment extends Fragment {
 
         mInput = (EditText) view.findViewById(R.id.input);
 
-
         floatingActionButton = (FloatingActionButton) view.findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String message = mInput.getText().toString();
+                String message = mInput.getText().toString().trim();
+                if (TextUtils.isEmpty(message)) {
+                    mInput.requestFocus();
+                    return;
+                }
                 mInput.setText("");
-                MyClientTask myClientTask = new MyClientTask(message);
-                myClientTask.execute();
+
+                addMessage(mUsername, message);
+                mSocket.emit("new message",mUsername, message);
             }
         });
     }
 
-    public class MyClientTask extends AsyncTask<Void, Void, Void> {
-        String address = "192.168.43.220";
-        int port = 8888;
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
 
-        String response;
-        String message;
+        mSocket.disconnect();
 
-        MyClientTask(String message){
-            this.message = message;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            Socket socket = null;
-            DataInputStream in = null;
-            DataOutputStream out = null;
-            try {
-                socket = new Socket(address, port);
-                out = new DataOutputStream(socket.getOutputStream());
-                in = new DataInputStream(socket.getInputStream());
-                out.writeUTF(message);
-                out.flush();
-                response = in.readUTF();
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (socket != null) {
-                    try {
-                        socket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if (out != null) {
-                    try {
-                        out.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            ChatMessage chatMessage = new ChatMessage();
-            chatMessage.setMessageText(response);
-            mMessages.add(chatMessage);
-            mAdapter.notifyDataSetChanged();
-        }
-
+        mSocket.off(Socket.EVENT_CONNECT, onConnect);
+        mSocket.off("user disconnect", onDisconnect);;
+        mSocket.off("message", onNewMessage);
     }
+
+    public void addMessage(String userName, String message){
+        ChatMessage chatMessage = new ChatMessage(userName, message);
+        mMessages.add(chatMessage);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private Emitter.Listener onConnect = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                            mSocket.emit("connection", mUsername);
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "connect", Toast.LENGTH_LONG).show();
+
+
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onDisconnect = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.i(TAG, "disconnected");
+                    Toast.makeText(getActivity().getApplicationContext(),
+                            "disconnect", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String userName;
+                    String message;
+                    try {
+                        userName = data.getString("user");
+                        message = data.getString("message");
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                        return;
+                    }
+                    addMessage(userName, message);
+                }
+            });
+        }
+    };
 }
 

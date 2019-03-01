@@ -12,7 +12,6 @@ import com.andrey.wooppaymessenger.R;
 import com.andrey.wooppaymessenger.models.ChatMessage;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -24,13 +23,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     class MessageViewHolder extends RecyclerView.ViewHolder{
-        //TextView messageUser;
+        TextView messageUser;
         TextView messageTime;
         TextView messageText;
 
         public MessageViewHolder(View v){
             super(v);
-            //messageUser = v.findViewById(R.id.message_user);
+            messageUser = v.findViewById(R.id.message_user);
             messageTime = v.findViewById(R.id.message_time);
             messageText = v.findViewById(R.id.message_text);
         }
@@ -57,7 +56,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         DateFormat df = DateFormat.getTimeInstance();
         String time = df.format(messageList.get(position).getMessageTime());
-        //holder.messageUser.setText(messageList.get(position).getMessageUser());
+        holder.messageUser.setText(messageList.get(position).getMessageUser());
         holder.messageTime.setText(time);
         holder.messageText.setText(messageList.get(position).getMessageText());
     }
