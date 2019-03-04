@@ -27,6 +27,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ChatFragment extends Fragment {
     private static final String TAG = "MainActivity";
@@ -35,7 +36,10 @@ public class ChatFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private MessageAdapter mAdapter;
 
+    UUID uuid = UUID.randomUUID();
+
     private String mUsername = "User";
+    private String mRoom = uuid.toString();
 
     Socket mSocket;
 
@@ -96,10 +100,17 @@ public class ChatFragment extends Fragment {
                 }
                 mInput.setText("");
 
-                addMessage(mUsername, message);
-                mSocket.emit("new message",mUsername, message);
+               // addMessage(mUsername, message);
+                mSocket.emit("new message",mUsername, mRoom, message);
             }
         });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        mSocket.emit("reconnect", mRoom);
     }
 
     @Override
@@ -126,6 +137,7 @@ public class ChatFragment extends Fragment {
                 @Override
                 public void run() {
                             mSocket.emit("connection", mUsername);
+                            mSocket.emit("room", mRoom);
                         Toast.makeText(getActivity().getApplicationContext(),
                                 "connect", Toast.LENGTH_LONG).show();
 
