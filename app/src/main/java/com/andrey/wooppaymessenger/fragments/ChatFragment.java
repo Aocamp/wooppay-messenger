@@ -3,6 +3,7 @@ package com.andrey.wooppaymessenger.fragments;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,26 +32,25 @@ import java.util.UUID;
 
 public class ChatFragment extends Fragment {
     private static final String TAG = "MainActivity";
+    private static final String ARG_PARAM1 = "room";
 
     private List<ChatMessage> mMessages = new ArrayList<>();
     private RecyclerView mRecyclerView;
     private MessageAdapter mAdapter;
 
-    UUID uuid = UUID.randomUUID();
-
     private String mUsername = "User";
-    private String mRoom = uuid.toString();
+    private String mRoom;
 
     Socket mSocket;
 
     FloatingActionButton floatingActionButton;
     EditText mInput;
 
-    public static ChatFragment newInstance(String param1, String param2) {
-        ChatFragment fragment = new ChatFragment();
+    public static ChatFragment newInstance(String param1) {
         Bundle args = new Bundle();
-        // args.putString(ARG_PARAM1, param1);
-        // args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_PARAM1, param1);
+
+        ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -65,12 +65,22 @@ public class ChatFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //setRetainInstance(true);
+
         ChatApplication app = (ChatApplication) getActivity().getApplication();
         mSocket = app.getSocket();
         mSocket.on(Socket.EVENT_CONNECT, onConnect);
         mSocket.on("user disconnect", onDisconnect);
         mSocket.on("message", onNewMessage);
         mSocket.connect();
+
+        if (savedInstanceState == null) {
+            UUID uuid = UUID.randomUUID();
+            mRoom = uuid.toString();
+        } else {
+            mRoom = savedInstanceState.getString(ARG_PARAM1);
+        }
+
     }
 
     @Override
@@ -110,7 +120,7 @@ public class ChatFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        mSocket.emit("reconnect", mRoom);
+        onSaveInstanceState(new Bundle());
     }
 
     @Override
@@ -122,6 +132,12 @@ public class ChatFragment extends Fragment {
         mSocket.off(Socket.EVENT_CONNECT, onConnect);
         mSocket.off("user disconnect", onDisconnect);;
         mSocket.off("message", onNewMessage);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(ARG_PARAM1, mRoom);
     }
 
     public void addMessage(String userName, String message){
@@ -182,5 +198,6 @@ public class ChatFragment extends Fragment {
             });
         }
     };
+
 }
 
