@@ -1,7 +1,6 @@
 package com.andrey.wooppaymessenger.fragments;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -26,6 +25,7 @@ import com.github.nkzawa.socketio.client.Socket;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -33,6 +33,7 @@ import java.util.UUID;
 public class ChatFragment extends Fragment {
     private static final String TAG = "MainActivity";
     private static final String ARG_PARAM1 = "room";
+    public static final String MESSAGE_LIST = "list of messages";
 
     private List<ChatMessage> mMessages = new ArrayList<>();
     private RecyclerView mRecyclerView;
@@ -46,9 +47,9 @@ public class ChatFragment extends Fragment {
     FloatingActionButton floatingActionButton;
     EditText mInput;
 
-    public static ChatFragment newInstance(String param1) {
+    public static ChatFragment newInstance(List<ChatMessage> param1) {
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
+        args.putString(MESSAGE_LIST, String.valueOf(param1));
 
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
@@ -65,7 +66,7 @@ public class ChatFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //setRetainInstance(true);
+        setRetainInstance(true);
 
         ChatApplication app = (ChatApplication) getActivity().getApplication();
         mSocket = app.getSocket();
@@ -121,6 +122,7 @@ public class ChatFragment extends Fragment {
         super.onPause();
 
         onSaveInstanceState(new Bundle());
+
     }
 
     @Override
