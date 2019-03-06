@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 
 import java.util.Date;
 
-@Entity(tableName = "Messages")
+@Entity(tableName = "message_table")
 public class Message {
     @NonNull
     @PrimaryKey(autoGenerate = true)
@@ -25,9 +25,9 @@ public class Message {
     }
 
     @Ignore
-    public Message(String messageText, String messageUser) {
-        this.messageText = messageText;
+    public Message(String messageUser, String messageText) {
         this.messageUser = messageUser;
+        this.messageText = messageText;
         messageTime = new Date().getTime();
     }
 

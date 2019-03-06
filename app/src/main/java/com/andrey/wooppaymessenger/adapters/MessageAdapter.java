@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.andrey.wooppaymessenger.R;
+import com.andrey.wooppaymessenger.database.models.Message;
+import com.andrey.wooppaymessenger.fragments.ChatFragment;
 import com.andrey.wooppaymessenger.models.ChatMessage;
 
 import java.text.DateFormat;
@@ -16,11 +18,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
-    private List<ChatMessage> messageList;
-
-    public MessageAdapter(Context context, List<ChatMessage> messages) {
-        messageList = messages;
-    }
 
     class MessageViewHolder extends RecyclerView.ViewHolder{
         TextView messageUser;
@@ -35,21 +32,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
     }
 
-    public void setItem(Collection<ChatMessage> messages){
-        messageList.addAll(messages);
-        notifyDataSetChanged();
-    }
+    private List<Message> messageList;
+    private final LayoutInflater mInflater;
 
-    public void clearItem(){
-        messageList.clear();
-        notifyDataSetChanged();
+    public MessageAdapter(Context context) {
+        mInflater = LayoutInflater.from(context);
     }
 
     @NonNull
     @Override
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message, parent, false);
-        return new MessageViewHolder(view);
+        View itemView = mInflater.inflate(R.layout.message, parent, false);
+        return new MessageViewHolder(itemView);
     }
 
     @Override
@@ -61,8 +55,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.messageText.setText(messageList.get(position).getMessageText());
     }
 
+    public void setItem(List<Message> messages){
+        messageList = messages;
+        notifyDataSetChanged();
+    }
+
+    public void clearItem() {
+        messageList.clear();
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
-        return messageList.size();
+        if (messageList != null)
+            return messageList.size();
+        else return 0;
     }
 }

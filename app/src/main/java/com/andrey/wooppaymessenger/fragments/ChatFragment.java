@@ -1,8 +1,11 @@
 package com.andrey.wooppaymessenger.fragments;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +21,8 @@ import android.widget.Toast;
 import com.andrey.wooppaymessenger.ChatApplication;
 import com.andrey.wooppaymessenger.R;
 import com.andrey.wooppaymessenger.adapters.MessageAdapter;
+import com.andrey.wooppaymessenger.database.MessageViewModel;
+import com.andrey.wooppaymessenger.database.models.Message;
 import com.andrey.wooppaymessenger.models.ChatMessage;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
@@ -25,7 +30,6 @@ import com.github.nkzawa.socketio.client.Socket;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -33,11 +37,11 @@ import java.util.UUID;
 public class ChatFragment extends Fragment {
     private static final String TAG = "MainActivity";
     private static final String ARG_PARAM1 = "room";
-    public static final String MESSAGE_LIST = "list of messages";
 
-    private List<ChatMessage> mMessages = new ArrayList<>();
     private RecyclerView mRecyclerView;
     private MessageAdapter mAdapter;
+
+    private MessageViewModel mMessageViewModel;
 
     private String mUsername = "User";
     private String mRoom;
@@ -47,26 +51,27 @@ public class ChatFragment extends Fragment {
     FloatingActionButton floatingActionButton;
     EditText mInput;
 
-    public static ChatFragment newInstance(List<ChatMessage> param1) {
+   /* public static ChatFragment newInstance(List<ChatMessage> param1) {
         Bundle args = new Bundle();
         args.putString(MESSAGE_LIST, String.valueOf(param1));
 
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
-    }
+    }*/
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mAdapter = new MessageAdapter(context, mMessages);
+        mAdapter = new MessageAdapter(context);
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setRetainInstance(true);
+        //setRetainInstance(true);
 
         ChatApplication app = (ChatApplication) getActivity().getApplication();
         mSocket = app.getSocket();
@@ -75,13 +80,13 @@ public class ChatFragment extends Fragment {
         mSocket.on("message", onNewMessage);
         mSocket.connect();
 
-        if (savedInstanceState == null) {
+        if(savedInstanceState != null){
+            mRoom = savedInstanceState.getString(ARG_PARAM1);
+
+        }else {
             UUID uuid = UUID.randomUUID();
             mRoom = uuid.toString();
-        } else {
-            mRoom = savedInstanceState.getString(ARG_PARAM1);
         }
-
     }
 
     @Override
@@ -93,6 +98,15 @@ public class ChatFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mMessageViewModel = ViewModelProviders.of(this).get(MessageViewModel.class);
+
+        mMessageViewModel.getAllMessages().observe(this, new Observer<List<Message>>() {
+            @Override
+            public void onChanged(@Nullable final List<Message> messages) {
+                mAdapter.setItem(messages);
+            }
+        });
 
         mRecyclerView = view.findViewById(R.id.recycler_view_messages);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -118,14 +132,6 @@ public class ChatFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-
-        onSaveInstanceState(new Bundle());
-
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
 
@@ -142,11 +148,11 @@ public class ChatFragment extends Fragment {
         outState.putString(ARG_PARAM1, mRoom);
     }
 
-    public void addMessage(String userName, String message){
-        ChatMessage chatMessage = new ChatMessage(userName, message);
-        mMessages.add(chatMessage);
-        mAdapter.notifyDataSetChanged();
-    }
+//    public void addMessage(String userName, String message){
+//        ChatMessage chatMessage = new ChatMessage(userName, message);
+//        mMessages.add(chatMessage);
+//        mAdapter.notifyDataSetChanged();
+//    }
 
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
@@ -195,7 +201,9 @@ public class ChatFragment extends Fragment {
                         Log.e(TAG, e.getMessage());
                         return;
                     }
-                    addMessage(userName, message);
+                    Message messages = new Message(userName, message);
+                    mMessageViewModel.insert(messages);
+                    //addMessage(userName, message);
                 }
             });
         }

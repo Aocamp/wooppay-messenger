@@ -1,8 +1,11 @@
 package com.andrey.wooppaymessenger.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Date;
 
-public class ChatMessage {
+public class ChatMessage implements Parcelable{
     private String messageText;
     private String messageUser;
     private long messageTime;
@@ -43,5 +46,15 @@ public class ChatMessage {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(messageText);
+        dest.writeString(messageUser);
+        dest.writeValue(messageTime);
+    }
 }

@@ -14,6 +14,9 @@ public interface MessageDao {
     @Insert
     void insertMessage (Message message);
 
-    @Query("SELECT * from Messages")
+    @Query("DELETE FROM message_table")
+    void deleteAll();
+
+    @Query("SELECT * from message_table")
     LiveData<List<Message>> getAllMessages();
 }
