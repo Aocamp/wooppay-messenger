@@ -15,13 +15,13 @@ public class MessageRepository {
 
     MessageRepository(Application application) {
         ChatDatabase db = ChatDatabase.getDatabase(application);
-        mMessageDao = db.messageDaoAccess();
+        mMessageDao = db.getMessageDao();
         mAllMessages = mMessageDao.getAllMessages();
     }
+
     LiveData<List<Message>> getAllMessages() {
         return mAllMessages;
     }
-
 
     public void insert (Message message) {
         new insertAsyncTask(mMessageDao).execute(message);

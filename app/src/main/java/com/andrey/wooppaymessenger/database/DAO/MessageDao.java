@@ -14,6 +14,9 @@ public interface MessageDao {
     @Insert
     void insertMessage (Message message);
 
+    @Insert
+    void insertAllMessages (Message... messages);
+
     @Query("DELETE FROM message_table")
     void deleteAll();
 

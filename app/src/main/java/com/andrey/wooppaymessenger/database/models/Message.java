@@ -31,6 +31,12 @@ public class Message {
         messageTime = new Date().getTime();
     }
 
+    @Ignore
+    public Message(String messageText) {
+        this.messageText = messageText;
+        messageTime = new Date().getTime();
+    }
+
     public int getId() {
         return id;
     }

@@ -23,7 +23,6 @@ import com.andrey.wooppaymessenger.R;
 import com.andrey.wooppaymessenger.adapters.MessageAdapter;
 import com.andrey.wooppaymessenger.database.MessageViewModel;
 import com.andrey.wooppaymessenger.database.models.Message;
-import com.andrey.wooppaymessenger.models.ChatMessage;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 
