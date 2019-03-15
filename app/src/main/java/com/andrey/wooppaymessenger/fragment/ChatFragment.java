@@ -233,8 +233,15 @@ public class ChatFragment extends Fragment {
                         return;
                     }
                     Message messages = new Message(userName, message);
-                    mMessageViewModel.insert(messages);
+//                    mMessageViewModel.insert(messages);
+
                     //addMessage(userName, message);
+                    Call<List<ChatMessage>> newMessage = RestController
+                            .getInstance()
+                            .getMessageApi()
+                            .getAllMessages();
+
+                    newMessage.enqueue(messageCallback);
                 }
             });
         }
