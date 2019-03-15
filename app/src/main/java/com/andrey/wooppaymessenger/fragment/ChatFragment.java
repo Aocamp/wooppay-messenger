@@ -1,4 +1,4 @@
-package com.andrey.wooppaymessenger.fragments;
+package com.andrey.wooppaymessenger.fragment;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
@@ -20,18 +20,27 @@ import android.widget.Toast;
 
 import com.andrey.wooppaymessenger.ChatApplication;
 import com.andrey.wooppaymessenger.R;
-import com.andrey.wooppaymessenger.adapters.MessageAdapter;
+import com.andrey.wooppaymessenger.RestController;
+import com.andrey.wooppaymessenger.adapter.MessageAdapter;
 import com.andrey.wooppaymessenger.database.MessageViewModel;
-import com.andrey.wooppaymessenger.database.models.Message;
+import com.andrey.wooppaymessenger.database.model.Message;
+import com.andrey.wooppaymessenger.model.ChatMessage;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ChatFragment extends Fragment {
     private static final String TAG = "MainActivity";
@@ -42,7 +51,7 @@ public class ChatFragment extends Fragment {
 
     private MessageViewModel mMessageViewModel;
 
-    private String mUsername = "User";
+    private String mUsername = "User1";
     private String mRoom;
 
     Socket mSocket;
@@ -98,14 +107,21 @@ public class ChatFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mMessageViewModel = ViewModelProviders.of(this).get(MessageViewModel.class);
+//        mMessageViewModel = ViewModelProviders.of(getActivity()).get(MessageViewModel.class);
+//
+//        mMessageViewModel.getAllMessages().observe(this, new Observer<List<Message>>() {
+//            @Override
+//            public void onChanged(@Nullable final List<Message> messages) {
+//                mAdapter.setItem(messages);
+//            }
+//        });
 
-        mMessageViewModel.getAllMessages().observe(this, new Observer<List<Message>>() {
-            @Override
-            public void onChanged(@Nullable final List<Message> messages) {
-                mAdapter.setItem(messages);
-            }
-        });
+        Call<List<ChatMessage>> messages = RestController
+                .getInstance()
+                .getMessageApi()
+                .getAllMessages();
+
+        messages.enqueue(messageCallback);
 
         mRecyclerView = view.findViewById(R.id.recycler_view_messages);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -124,8 +140,11 @@ public class ChatFragment extends Fragment {
                 }
                 mInput.setText("");
 
+                Date dt = new Date();
+                DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+                String currentTime = sdf.format(dt);
                // addMessage(mUsername, message);
-                mSocket.emit("new message",mUsername, mRoom, message);
+                mSocket.emit("new message",mUsername, message, currentTime);
             }
         });
     }
@@ -152,6 +171,19 @@ public class ChatFragment extends Fragment {
 //        mMessages.add(chatMessage);
 //        mAdapter.notifyDataSetChanged();
 //    }
+
+    Callback<List<ChatMessage>> messageCallback =  new Callback<List<ChatMessage>>() {
+        @Override
+        public void onResponse(@NonNull Call<List<ChatMessage>> call, @NonNull Response<List<ChatMessage>> response) {
+            List<ChatMessage> message = response.body();
+            mAdapter.setItem(message);
+        }
+
+        @Override
+        public void onFailure(@NonNull Call<List<ChatMessage>> call, @NonNull Throwable t) {
+            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    };
 
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override

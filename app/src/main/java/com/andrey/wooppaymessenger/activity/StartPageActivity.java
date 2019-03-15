@@ -1,24 +1,13 @@
-package com.andrey.wooppaymessenger.activities;
+package com.andrey.wooppaymessenger.activity;
 
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.andrey.wooppaymessenger.Controller;
 import com.andrey.wooppaymessenger.R;
-import com.andrey.wooppaymessenger.activities.register_activities.CreateAccountActivity;
-import com.andrey.wooppaymessenger.models.AuthData;
-import com.andrey.wooppaymessenger.models.User;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.HttpException;
-import retrofit2.Response;
+import com.andrey.wooppaymessenger.activity.register_activity.CreateAccountActivity;
 
 public class StartPageActivity extends AppCompatActivity {
     private static final String TAG = "myLogs";

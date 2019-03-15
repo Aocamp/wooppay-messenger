@@ -5,7 +5,7 @@ import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 
 import com.andrey.wooppaymessenger.database.DAO.MessageDao;
-import com.andrey.wooppaymessenger.database.models.Message;
+import com.andrey.wooppaymessenger.database.model.Message;
 
 import java.util.List;
 

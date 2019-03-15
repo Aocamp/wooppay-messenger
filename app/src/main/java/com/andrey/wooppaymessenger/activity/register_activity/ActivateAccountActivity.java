@@ -1,4 +1,4 @@
-package com.andrey.wooppaymessenger.activities.register_activities;
+package com.andrey.wooppaymessenger.activity.register_activity;
 
 import android.content.Intent;
 import android.os.Bundle;

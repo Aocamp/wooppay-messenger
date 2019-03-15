@@ -1,4 +1,4 @@
-package com.andrey.wooppaymessenger.database.models;
+package com.andrey.wooppaymessenger.database.model;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;

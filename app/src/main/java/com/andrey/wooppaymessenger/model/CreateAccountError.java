@@ -1,4 +1,4 @@
-package com.andrey.wooppaymessenger.models;
+package com.andrey.wooppaymessenger.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

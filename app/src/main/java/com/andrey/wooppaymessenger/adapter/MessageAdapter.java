@@ -1,4 +1,4 @@
-package com.andrey.wooppaymessenger.adapters;
+package com.andrey.wooppaymessenger.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -9,12 +9,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.andrey.wooppaymessenger.R;
-import com.andrey.wooppaymessenger.database.models.Message;
-import com.andrey.wooppaymessenger.fragments.ChatFragment;
-import com.andrey.wooppaymessenger.models.ChatMessage;
+import com.andrey.wooppaymessenger.database.model.Message;
+import com.andrey.wooppaymessenger.model.ChatMessage;
 
 import java.text.DateFormat;
-import java.util.Collection;
 import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
@@ -32,7 +30,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
     }
 
-    private List<Message> messageList;
+    private List<ChatMessage> messageList;
     private final LayoutInflater mInflater;
 
     public MessageAdapter(Context context) {
@@ -49,13 +47,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         DateFormat df = DateFormat.getTimeInstance();
-        String time = df.format(messageList.get(position).getMessageTime());
-        holder.messageUser.setText(messageList.get(position).getMessageUser());
-        holder.messageTime.setText(time);
+//        String time = df.format(messageList.get(position).getMessageDate());
+        holder.messageUser.setText(messageList.get(position).getUserId());
+        holder.messageTime.setText(messageList.get(position).getMessageDate());
         holder.messageText.setText(messageList.get(position).getMessageText());
     }
 
-    public void setItem(List<Message> messages){
+    public void setItem(List<ChatMessage> messages){
         messageList = messages;
         notifyDataSetChanged();
     }

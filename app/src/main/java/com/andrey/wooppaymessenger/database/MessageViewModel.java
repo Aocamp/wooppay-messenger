@@ -4,7 +4,7 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 
-import com.andrey.wooppaymessenger.database.models.Message;
+import com.andrey.wooppaymessenger.database.model.Message;
 
 import java.util.List;
 

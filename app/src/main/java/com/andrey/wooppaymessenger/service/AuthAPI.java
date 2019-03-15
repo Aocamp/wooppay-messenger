@@ -1,9 +1,8 @@
-package com.andrey.wooppaymessenger.services;
+package com.andrey.wooppaymessenger.service;
 
-import com.andrey.wooppaymessenger.models.AuthData;
-import com.andrey.wooppaymessenger.models.User;
+import com.andrey.wooppaymessenger.model.AuthData;
+import com.andrey.wooppaymessenger.model.User;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;

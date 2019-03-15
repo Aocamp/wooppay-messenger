@@ -1,8 +1,8 @@
-package com.andrey.wooppaymessenger.activities;
+package com.andrey.wooppaymessenger.activity;
 
 import android.support.v4.app.Fragment;
 
-import com.andrey.wooppaymessenger.fragments.ChatFragment;
+import com.andrey.wooppaymessenger.fragment.ChatFragment;
 
 public class MainActivity extends SingleFragmentActivity {
 

@@ -1,4 +1,4 @@
-package com.andrey.wooppaymessenger.activities.register_activities;
+package com.andrey.wooppaymessenger.activity.register_activity;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -10,12 +10,7 @@ import android.widget.Toast;
 
 import com.andrey.wooppaymessenger.R;
 import com.andrey.wooppaymessenger.Controller;
-import com.andrey.wooppaymessenger.models.CreateAccountError;
-import com.andrey.wooppaymessenger.models.RegisterData;
-import com.google.gson.Gson;
 
-
-import java.io.IOException;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;

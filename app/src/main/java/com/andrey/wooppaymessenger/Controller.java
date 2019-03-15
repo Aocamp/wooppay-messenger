@@ -1,7 +1,7 @@
 package com.andrey.wooppaymessenger;
 
-import com.andrey.wooppaymessenger.services.AuthAPI;
-import com.andrey.wooppaymessenger.services.RegisterAPI;
+import com.andrey.wooppaymessenger.service.AuthAPI;
+import com.andrey.wooppaymessenger.service.RegisterAPI;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

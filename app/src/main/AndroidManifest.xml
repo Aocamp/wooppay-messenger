@@ -12,18 +12,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.MainActivity">
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.register_activities.CreateAccountActivity" />
-        <activity android:name=".activities.register_activities.ActivateAccountActivity" />
-        <activity android:name=".activities.register_activities.SetPasswordActivity" />
-        <activity android:name=".activities.AuthActivity" />
-        <activity android:name=".activities.StartPageActivity" />
+        <activity android:name=".activity.register_activity.CreateAccountActivity" />
+        <activity android:name=".activity.register_activity.ActivateAccountActivity" />
+        <activity android:name=".activity.register_activity.SetPasswordActivity" />
+        <activity android:name=".activity.AuthActivity" />
+        <activity android:name=".activity.StartPageActivity" />
     </application>
 
 </manifest>

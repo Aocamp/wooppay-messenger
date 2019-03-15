@@ -1,4 +1,4 @@
-package com.andrey.wooppaymessenger.activities;
+package com.andrey.wooppaymessenger.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

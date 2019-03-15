@@ -1,15 +1,12 @@
 package com.andrey.wooppaymessenger.database;
 
-import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 
 import com.andrey.wooppaymessenger.database.DAO.MessageDao;
-import com.andrey.wooppaymessenger.database.models.Message;
+import com.andrey.wooppaymessenger.database.model.Message;
 
 @Database(entities = {Message.class}, version = 1, exportSchema = false)
 public abstract class ChatDatabase extends RoomDatabase {

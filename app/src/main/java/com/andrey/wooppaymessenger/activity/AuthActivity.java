@@ -1,4 +1,4 @@
-package com.andrey.wooppaymessenger.activities;
+package com.andrey.wooppaymessenger.activity;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -12,10 +12,8 @@ import android.widget.Toast;
 
 import com.andrey.wooppaymessenger.Controller;
 import com.andrey.wooppaymessenger.R;
-import com.andrey.wooppaymessenger.models.AuthData;
-import com.andrey.wooppaymessenger.models.User;
-
-import java.net.Socket;
+import com.andrey.wooppaymessenger.model.AuthData;
+import com.andrey.wooppaymessenger.model.User;
 
 import retrofit2.Call;
 import retrofit2.Callback;
