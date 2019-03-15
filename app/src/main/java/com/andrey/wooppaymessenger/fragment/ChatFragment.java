@@ -53,6 +53,7 @@ public class ChatFragment extends Fragment {
 
     private String mUsername = "User1";
     private String mRoom;
+    private String mRoomId;
 
     Socket mSocket;
 
@@ -86,6 +87,7 @@ public class ChatFragment extends Fragment {
         mSocket.on(Socket.EVENT_CONNECT, onConnect);
         mSocket.on("user disconnect", onDisconnect);
         mSocket.on("message", onNewMessage);
+        mSocket.on("roomId", onRoomIdMessage);
         mSocket.connect();
 
         if(savedInstanceState != null){
@@ -119,7 +121,7 @@ public class ChatFragment extends Fragment {
         Call<List<ChatMessage>> messages = RestController
                 .getInstance()
                 .getMessageApi()
-                .getAllMessages();
+                .getMessageByRoomId(mRoomId);
 
         messages.enqueue(messageCallback);
 
@@ -158,6 +160,7 @@ public class ChatFragment extends Fragment {
         mSocket.off(Socket.EVENT_CONNECT, onConnect);
         mSocket.off("user disconnect", onDisconnect);;
         mSocket.off("message", onNewMessage);
+        mSocket.off("roomId", onRoomIdMessage);
     }
 
     @Override
@@ -216,6 +219,23 @@ public class ChatFragment extends Fragment {
         }
     };
 
+    private Emitter.Listener onRoomIdMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    try {
+                        mRoomId = data.getString("id");
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                }
+            });
+        }
+    };
+
     private Emitter.Listener onNewMessage = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -239,7 +259,7 @@ public class ChatFragment extends Fragment {
                     Call<List<ChatMessage>> newMessage = RestController
                             .getInstance()
                             .getMessageApi()
-                            .getAllMessages();
+                            .getMessageByRoomId(mRoomId);
 
                     newMessage.enqueue(messageCallback);
                 }
