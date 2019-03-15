@@ -121,7 +121,7 @@ public class ChatFragment extends Fragment {
         Call<List<ChatMessage>> messages = RestController
                 .getInstance()
                 .getMessageApi()
-                .getMessageByRoomId(mRoomId);
+                .getAllMessages();
 
         messages.enqueue(messageCallback);
 
@@ -259,7 +259,7 @@ public class ChatFragment extends Fragment {
                     Call<List<ChatMessage>> newMessage = RestController
                             .getInstance()
                             .getMessageApi()
-                            .getMessageByRoomId(mRoomId);
+                            .getAllMessages();
 
                     newMessage.enqueue(messageCallback);
                 }
