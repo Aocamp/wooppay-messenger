@@ -161,8 +161,11 @@ public class ChatFragment extends Fragment {
         chatMessage.setUserLogin(userName);
         chatMessage.setMessageText(message);
         chatMessage.setMessageDate(date);
+
         mMessages.add(chatMessage);
+
         mAdapter.notifyDataSetChanged();
+
         scrollToBottom();
     }
 
