@@ -18,9 +18,6 @@ public class ChatApplication extends Application {
     public Socket getSocket() {
         if (mSocket == null) {
             try {
-//                IO.Options opts = new IO.Options();
-//                opts.forceNew = true;
-//                opts.reconnection = true;
                 mSocket = IO.socket("http://192.168.43.220:8888");
             }catch (URISyntaxException e) {
                 throw new RuntimeException(e);

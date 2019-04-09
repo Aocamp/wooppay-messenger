@@ -8,7 +8,7 @@ import java.util.Date;
 public class ChatMessage {
     @SerializedName("id")
     @Expose
-    private String id;
+    private long id;
     @SerializedName("messageDate")
     @Expose
     private String messageDate;
@@ -17,16 +17,19 @@ public class ChatMessage {
     private String messageText;
     @SerializedName("roomId")
     @Expose
-    private String roomId;
+    private long roomId;
     @SerializedName("userId")
     @Expose
-    private String userId;
+    private long userId;
+    @SerializedName("userLogin")
+    @Expose
+    private String userLogin;
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -46,34 +49,27 @@ public class ChatMessage {
         this.messageText = messageText;
     }
 
-    public String getRoomId() {
+    public long getRoomId() {
         return roomId;
     }
 
-    public void setRoomId(String roomId) {
+    public void setRoomId(long roomId) {
         this.roomId = roomId;
     }
 
-    public String getUserId() {
+    public long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 
-
-    public ChatMessage(String id, String messageDate, String messageText, String roomId, String userId) {
-        this.messageText = messageText;
-        this.id = id;
-        this.userId = userId;
-        this.messageDate = messageDate;
-        this.roomId = roomId;
-
+    public String getUserLogin() {
+        return userLogin;
     }
 
-    public ChatMessage(){
-
+    public void setUserLogin(String userLogin) {
+        this.userLogin = userLogin;
     }
-
 }

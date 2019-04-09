@@ -13,16 +13,17 @@ import com.andrey.wooppaymessenger.database.model.Message;
 import com.andrey.wooppaymessenger.model.ChatMessage;
 
 import java.text.DateFormat;
+import java.util.Collection;
 import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
-    class MessageViewHolder extends RecyclerView.ViewHolder{
+    class MessageViewHolder extends RecyclerView.ViewHolder {
         TextView messageUser;
         TextView messageTime;
         TextView messageText;
 
-        public MessageViewHolder(View v){
+        public MessageViewHolder(View v) {
             super(v);
             messageUser = v.findViewById(R.id.message_user);
             messageTime = v.findViewById(R.id.message_time);
@@ -31,9 +32,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     private List<ChatMessage> messageList;
+
     private final LayoutInflater mInflater;
 
-    public MessageAdapter(Context context) {
+    public MessageAdapter(Context context, List<ChatMessage> mMessages) {
+        messageList = mMessages;
         mInflater = LayoutInflater.from(context);
     }
 
@@ -46,15 +49,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        DateFormat df = DateFormat.getTimeInstance();
+//        DateFormat df = DateFormat.getTimeInstance();
 //        String time = df.format(messageList.get(position).getMessageDate());
-        holder.messageUser.setText(messageList.get(position).getUserId());
+        holder.messageUser.setText(messageList.get(position).getUserLogin());
         holder.messageTime.setText(messageList.get(position).getMessageDate());
         holder.messageText.setText(messageList.get(position).getMessageText());
     }
 
-    public void setItem(List<ChatMessage> messages){
-        messageList = messages;
+    public void setItem(Collection<ChatMessage> messages) {
+        messageList.addAll(messages);
         notifyDataSetChanged();
     }
 

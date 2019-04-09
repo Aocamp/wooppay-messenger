@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -46,6 +47,8 @@ public class ChatFragment extends Fragment {
     private static final String TAG = "MainActivity";
     private static final String ARG_PARAM1 = "room";
 
+    private List<ChatMessage> mMessages = new ArrayList<>();
+
     private RecyclerView mRecyclerView;
     private MessageAdapter mAdapter;
 
@@ -53,47 +56,35 @@ public class ChatFragment extends Fragment {
 
     private String mUsername = "User1";
     private String mRoom;
-    private String mRoomId;
+
+    private Long mRoomId;
 
     Socket mSocket;
 
     FloatingActionButton floatingActionButton;
     EditText mInput;
 
-   /* public static ChatFragment newInstance(List<ChatMessage> param1) {
-        Bundle args = new Bundle();
-        args.putString(MESSAGE_LIST, String.valueOf(param1));
-
-        ChatFragment fragment = new ChatFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }*/
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mAdapter = new MessageAdapter(context);
+        mAdapter = new MessageAdapter(context, mMessages);
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //setRetainInstance(true);
-
         ChatApplication app = (ChatApplication) getActivity().getApplication();
         mSocket = app.getSocket();
         mSocket.on(Socket.EVENT_CONNECT, onConnect);
+        mSocket.on("roomId", onRoomIdMessage);
         mSocket.on("user disconnect", onDisconnect);
         mSocket.on("message", onNewMessage);
-        mSocket.on("roomId", onRoomIdMessage);
         mSocket.connect();
 
-        if(savedInstanceState != null){
+        if (savedInstanceState != null) {
             mRoom = savedInstanceState.getString(ARG_PARAM1);
-
-        }else {
+        } else {
             UUID uuid = UUID.randomUUID();
             mRoom = uuid.toString();
         }
@@ -118,13 +109,6 @@ public class ChatFragment extends Fragment {
 //            }
 //        });
 
-        Call<List<ChatMessage>> messages = RestController
-                .getInstance()
-                .getMessageApi()
-                .getAllMessages();
-
-        messages.enqueue(messageCallback);
-
         mRecyclerView = view.findViewById(R.id.recycler_view_messages);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
@@ -136,17 +120,20 @@ public class ChatFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String message = mInput.getText().toString().trim();
+
                 if (TextUtils.isEmpty(message)) {
                     mInput.requestFocus();
                     return;
                 }
+
                 mInput.setText("");
 
                 Date dt = new Date();
-                DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+                DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                 String currentTime = sdf.format(dt);
-               // addMessage(mUsername, message);
-                mSocket.emit("new message",mUsername, message, currentTime);
+
+                addMessage(mUsername, message, currentTime);
+                mSocket.emit("new message", mUsername, message, currentTime);
             }
         });
     }
@@ -158,7 +145,7 @@ public class ChatFragment extends Fragment {
         mSocket.disconnect();
 
         mSocket.off(Socket.EVENT_CONNECT, onConnect);
-        mSocket.off("user disconnect", onDisconnect);;
+        mSocket.off("user disconnect", onDisconnect);
         mSocket.off("message", onNewMessage);
         mSocket.off("roomId", onRoomIdMessage);
     }
@@ -169,17 +156,35 @@ public class ChatFragment extends Fragment {
         outState.putString(ARG_PARAM1, mRoom);
     }
 
-//    public void addMessage(String userName, String message){
-//        ChatMessage chatMessage = new ChatMessage(userName, message);
-//        mMessages.add(chatMessage);
-//        mAdapter.notifyDataSetChanged();
-//    }
+    private void addMessage(String userName, String message, String date) {
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setUserLogin(userName);
+        chatMessage.setMessageText(message);
+        chatMessage.setMessageDate(date);
+        mMessages.add(chatMessage);
+        mAdapter.notifyDataSetChanged();
+        scrollToBottom();
+    }
 
-    Callback<List<ChatMessage>> messageCallback =  new Callback<List<ChatMessage>>() {
+    private void loadMessage(Long id){
+        Call<List<ChatMessage>> messages = RestController
+                .getInstance()
+                .getMessageApi()
+                .getMessagesByRoomId(id);
+
+        messages.enqueue(messageCallback);
+    }
+
+    private void scrollToBottom() {
+        mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
+    }
+
+    Callback<List<ChatMessage>> messageCallback = new Callback<List<ChatMessage>>() {
         @Override
         public void onResponse(@NonNull Call<List<ChatMessage>> call, @NonNull Response<List<ChatMessage>> response) {
             List<ChatMessage> message = response.body();
             mAdapter.setItem(message);
+            scrollToBottom();
         }
 
         @Override
@@ -194,12 +199,31 @@ public class ChatFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                            mSocket.emit("connection", mUsername);
-                            mSocket.emit("room", mRoom);
-                        Toast.makeText(getActivity().getApplicationContext(),
-                                "connect", Toast.LENGTH_LONG).show();
+                    mSocket.emit("connection", mUsername);
+                    mSocket.emit("room", mRoom);
+                    Toast.makeText(getActivity().getApplicationContext(),
+                            "connect", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    };
 
-
+    private Emitter.Listener onRoomIdMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    Long id;
+                    try {
+                        id = data.getLong("id");
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                        return;
+                    }
+                    mRoomId = id;
+                    loadMessage(mRoomId);
                 }
             });
         }
@@ -219,23 +243,6 @@ public class ChatFragment extends Fragment {
         }
     };
 
-    private Emitter.Listener onRoomIdMessage = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    try {
-                        mRoomId = data.getString("id");
-                    } catch (JSONException e) {
-                        Log.e(TAG, e.getMessage());
-                    }
-                }
-            });
-        }
-    };
-
     private Emitter.Listener onNewMessage = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -245,23 +252,19 @@ public class ChatFragment extends Fragment {
                     JSONObject data = (JSONObject) args[0];
                     String userName;
                     String message;
+                    String date;
                     try {
                         userName = data.getString("user");
                         message = data.getString("message");
+                        date = data.getString("date");
                     } catch (JSONException e) {
                         Log.e(TAG, e.getMessage());
                         return;
                     }
-                    Message messages = new Message(userName, message);
+//                    Message messages = new Message(userName, message);
 //                    mMessageViewModel.insert(messages);
-
-                    //addMessage(userName, message);
-                    Call<List<ChatMessage>> newMessage = RestController
-                            .getInstance()
-                            .getMessageApi()
-                            .getAllMessages();
-
-                    newMessage.enqueue(messageCallback);
+                    Log.i(TAG, message);
+                    addMessage(userName, message, date);
                 }
             });
         }

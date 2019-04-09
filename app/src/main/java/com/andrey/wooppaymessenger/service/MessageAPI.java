@@ -13,5 +13,5 @@ public interface MessageAPI {
     Call<List<ChatMessage>> getAllMessages();
 
     @GET("messages/room/{roomId}")
-    Call<List<ChatMessage>> getMessageByRoomId(@Path("roomId") String roomId);
+    Call<List<ChatMessage>> getMessagesByRoomId(@Path("roomId") Long roomId);
 }
