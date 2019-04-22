@@ -25,8 +25,11 @@ import com.andrey.wooppaymessenger.adapter.MessageAdapter;
 import com.andrey.wooppaymessenger.database.MessageViewModel;
 import com.andrey.wooppaymessenger.database.model.Message;
 import com.andrey.wooppaymessenger.model.ChatMessage;
+import com.andrey.wooppaymessenger.model.Room;
+import com.andrey.wooppaymessenger.model.User;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -132,8 +135,19 @@ public class ChatFragment extends Fragment {
                 DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                 String currentTime = sdf.format(dt);
 
-                addMessage(mUsername, message, currentTime);
-                mSocket.emit("new message", mUsername, message, currentTime);
+                ChatMessage chatMessage = new ChatMessage();
+                chatMessage.setUserLogin(mUsername);
+                chatMessage.setMessageText(message);
+                chatMessage.setMessageDate(currentTime);
+
+                try {
+                    Gson gson = new Gson();
+                    JSONObject messageObj = new JSONObject(gson.toJson(chatMessage));
+                    mSocket.emit("new message", messageObj);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
             }
         });
     }
@@ -143,7 +157,6 @@ public class ChatFragment extends Fragment {
         super.onDestroy();
 
         mSocket.disconnect();
-
         mSocket.off(Socket.EVENT_CONNECT, onConnect);
         mSocket.off("user disconnect", onDisconnect);
         mSocket.off("message", onNewMessage);
@@ -156,13 +169,8 @@ public class ChatFragment extends Fragment {
         outState.putString(ARG_PARAM1, mRoom);
     }
 
-    private void addMessage(String userName, String message, String date) {
-        ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setUserLogin(userName);
-        chatMessage.setMessageText(message);
-        chatMessage.setMessageDate(date);
-
-        mMessages.add(chatMessage);
+    private void addMessage(ChatMessage message) {
+        mMessages.add(message);
 
         mAdapter.notifyDataSetChanged();
 
@@ -202,10 +210,24 @@ public class ChatFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mSocket.emit("connection", mUsername);
-                    mSocket.emit("room", mRoom);
-                    Toast.makeText(getActivity().getApplicationContext(),
-                            "connect", Toast.LENGTH_LONG).show();
+                    try {
+                        Gson gson = new Gson();
+
+                        User user = new User();
+                        user.setUserLogin(mUsername);
+                        JSONObject userObj = new JSONObject(gson.toJson(user));
+                        mSocket.emit("connection", userObj);
+
+                        Room room = new Room();
+                        room.setRoomName(mRoom);
+                        JSONObject roomObj = new JSONObject(gson.toJson(room));
+                        mSocket.emit("room", roomObj);
+
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "connect", Toast.LENGTH_LONG).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         }
@@ -218,14 +240,16 @@ public class ChatFragment extends Fragment {
                 @Override
                 public void run() {
                     JSONObject data = (JSONObject) args[0];
-                    Long id;
+
+                    Room room = new Room();
+
                     try {
-                        id = data.getLong("id");
+                        room.setId(data.getLong("id"));
                     } catch (JSONException e) {
                         Log.e(TAG, e.getMessage());
                         return;
                     }
-                    mRoomId = id;
+                    mRoomId = room.getId();
                     loadMessage(mRoomId);
                 }
             });
@@ -253,21 +277,25 @@ public class ChatFragment extends Fragment {
                 @Override
                 public void run() {
                     JSONObject data = (JSONObject) args[0];
-                    String userName;
+                    String username;
                     String message;
                     String date;
                     try {
-                        userName = data.getString("user");
-                        message = data.getString("message");
-                        date = data.getString("date");
+                        username = data.getString("userLogin");
+                        message = data.getString("messageText");
+                        date = data.getString("messageDate");
+                        Log.i(TAG, message);
                     } catch (JSONException e) {
                         Log.e(TAG, e.getMessage());
                         return;
                     }
 //                    Message messages = new Message(userName, message);
 //                    mMessageViewModel.insert(messages);
-                    Log.i(TAG, message);
-                    addMessage(userName, message, date);
+                    ChatMessage chatMessage = new ChatMessage();
+                    chatMessage.setUserLogin(username);
+                    chatMessage.setMessageText(message);
+                    chatMessage.setMessageDate(date);
+                    addMessage(chatMessage);
                 }
             });
         }
