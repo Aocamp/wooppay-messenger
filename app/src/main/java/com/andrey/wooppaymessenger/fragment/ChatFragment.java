@@ -57,10 +57,11 @@ public class ChatFragment extends Fragment {
 
     private MessageViewModel mMessageViewModel;
 
-    private String mUsername = "User1";
+    private String mUsername = "User2";
     private String mRoom;
 
     private Long mRoomId;
+    private Long mUserId;
 
     Socket mSocket;
 
@@ -80,7 +81,7 @@ public class ChatFragment extends Fragment {
         ChatApplication app = (ChatApplication) getActivity().getApplication();
         mSocket = app.getSocket();
         mSocket.on(Socket.EVENT_CONNECT, onConnect);
-        mSocket.on("roomId", onRoomIdMessage);
+        mSocket.on("roomAndUserId", onRoomAndUserId);
         mSocket.on("user disconnect", onDisconnect);
         mSocket.on("message", onNewMessage);
         mSocket.connect();
@@ -139,6 +140,8 @@ public class ChatFragment extends Fragment {
                 chatMessage.setUserLogin(mUsername);
                 chatMessage.setMessageText(message);
                 chatMessage.setMessageDate(currentTime);
+                chatMessage.setRoomId(mRoomId);
+                chatMessage.setUserId(mUserId);
 
                 try {
                     Gson gson = new Gson();
@@ -160,7 +163,7 @@ public class ChatFragment extends Fragment {
         mSocket.off(Socket.EVENT_CONNECT, onConnect);
         mSocket.off("user disconnect", onDisconnect);
         mSocket.off("message", onNewMessage);
-        mSocket.off("roomId", onRoomIdMessage);
+        mSocket.off("roomAndUserId", onRoomAndUserId);
     }
 
     @Override
@@ -233,23 +236,27 @@ public class ChatFragment extends Fragment {
         }
     };
 
-    private Emitter.Listener onRoomIdMessage = new Emitter.Listener() {
+    private Emitter.Listener onRoomAndUserId = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    JSONObject data = (JSONObject) args[0];
+                    JSONObject roomData = (JSONObject) args[0];
+                    JSONObject userData = (JSONObject) args[1];
 
                     Room room = new Room();
+                    User user = new User();
 
                     try {
-                        room.setId(data.getLong("id"));
+                        room.setId(roomData.getLong("id"));
+                        user.setId(userData.getLong("id"));
                     } catch (JSONException e) {
                         Log.e(TAG, e.getMessage());
                         return;
                     }
                     mRoomId = room.getId();
+                    mUserId = user.getId();
                     loadMessage(mRoomId);
                 }
             });
