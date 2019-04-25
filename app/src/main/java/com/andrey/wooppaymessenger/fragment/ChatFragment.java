@@ -278,6 +278,7 @@ public class ChatFragment extends Fragment {
                         Log.e(TAG, e.getMessage());
                         return;
                     }
+
                     mRoomId = room.getId();
                     loadMessage(mRoomId);
                 }
