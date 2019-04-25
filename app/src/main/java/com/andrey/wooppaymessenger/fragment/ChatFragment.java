@@ -81,7 +81,8 @@ public class ChatFragment extends Fragment {
         ChatApplication app = (ChatApplication) getActivity().getApplication();
         mSocket = app.getSocket();
         mSocket.on(Socket.EVENT_CONNECT, onConnect);
-        mSocket.on("roomAndUserId", onRoomAndUserId);
+        mSocket.on("userConnected", onUserConnected);
+        mSocket.on("roomId", onRoomId);
         mSocket.on("user disconnect", onDisconnect);
         mSocket.on("message", onNewMessage);
         mSocket.connect();
@@ -162,8 +163,9 @@ public class ChatFragment extends Fragment {
         mSocket.disconnect();
         mSocket.off(Socket.EVENT_CONNECT, onConnect);
         mSocket.off("user disconnect", onDisconnect);
+        mSocket.off("userConnected", onUserConnected);
         mSocket.off("message", onNewMessage);
-        mSocket.off("roomAndUserId", onRoomAndUserId);
+        mSocket.off("roomId", onRoomId);
     }
 
     @Override
@@ -221,11 +223,6 @@ public class ChatFragment extends Fragment {
                         JSONObject userObj = new JSONObject(gson.toJson(user));
                         mSocket.emit("connection", userObj);
 
-                        Room room = new Room();
-                        room.setRoomName(mRoom);
-                        JSONObject roomObj = new JSONObject(gson.toJson(room));
-                        mSocket.emit("room", roomObj);
-
                         Toast.makeText(getActivity().getApplicationContext(),
                                 "connect", Toast.LENGTH_LONG).show();
                     } catch (JSONException e) {
@@ -236,27 +233,52 @@ public class ChatFragment extends Fragment {
         }
     };
 
-    private Emitter.Listener onRoomAndUserId = new Emitter.Listener() {
+    private Emitter.Listener onUserConnected = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject userData = (JSONObject) args[0];
+
+                    User user = new User();
+
+                    try {
+                        user.setId(userData.getLong("id"));
+                        mUserId = user.getId();
+
+                        Gson gson = new Gson();
+
+                        Room room = new Room();
+                        room.setRoomName(mRoom);
+                        room.setUserId(mUserId);
+                        JSONObject roomObj = new JSONObject(gson.toJson(room));
+                        mSocket.emit("room", roomObj);
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onRoomId = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     JSONObject roomData = (JSONObject) args[0];
-                    JSONObject userData = (JSONObject) args[1];
 
                     Room room = new Room();
-                    User user = new User();
 
                     try {
                         room.setId(roomData.getLong("id"));
-                        user.setId(userData.getLong("id"));
                     } catch (JSONException e) {
                         Log.e(TAG, e.getMessage());
                         return;
                     }
                     mRoomId = room.getId();
-                    mUserId = user.getId();
                     loadMessage(mRoomId);
                 }
             });
